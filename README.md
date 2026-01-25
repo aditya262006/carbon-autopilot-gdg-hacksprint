@@ -92,13 +92,13 @@ Using **Google Gemini AI**, the system provides explainable insights and simulat
 ## 🌐 Live Demo
 
 🔗 **MVP Link:**  
-https://carbon-autopilot.vercel.app
+https://carbon-autopilot-gdg-hacksprint.vercel.app/
 
 🎥 **Demo Video (3 Minutes):**  
 https://youtu.be/your-demo-video-link
 
 📁 **GitHub Repository:**  
-https://github.com/your-username/carbon-autopilot-gdg-hacksprint
+https://github.com/aditya262006/carbon-autopilot-gdg-hacksprint
 
 ---
 
