@@ -50,21 +50,18 @@ export async function getCarbonEntries(
 ) {
   const userId = await getUserId()
 
-  let query = db
-    .select()
-    .from(carbonEntries)
-    .where(eq(carbonEntries.userId, userId))
-
+  const conditions = [eq(carbonEntries.userId, userId)]
+  
   if (startDate && endDate) {
-    query = query.where(
-      and(
-        gte(carbonEntries.date, startDate),
-        lte(carbonEntries.date, endDate)
-      )
-    )
+    conditions.push(gte(carbonEntries.date, startDate))
+    conditions.push(lte(carbonEntries.date, endDate))
   }
 
-  return query.orderBy(desc(carbonEntries.date))
+  return db
+    .select()
+    .from(carbonEntries)
+    .where(and(...conditions))
+    .orderBy(desc(carbonEntries.date))
 }
 
 export async function deleteCarbonEntry(id: number) {
