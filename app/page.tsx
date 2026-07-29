@@ -1,163 +1,175 @@
-'use client'
-import { useState } from 'react'
+import { auth } from '@/lib/auth'
+import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
 
-export default function Home() {
-  const [commute, setCommute] = useState(10)
-  const [electricity, setElectricity] = useState(200)
-  const [meals, setMeals] = useState(5)
-  const [carbon, setCarbon] = useState<number | null>(null)
-  const [insight, setInsight] = useState('')
-  const [reducedCarbon, setReducedCarbon] = useState<number | null>(null)
-  const [darkMode, setDarkMode] = useState(false)
+export const metadata = {
+  title: 'Carbon Autopilot - Track & Reduce Your Carbon Footprint',
+  description:
+    'AI-powered sustainability dashboard to track emissions and get personalized recommendations for reducing your carbon footprint.',
+}
 
-  const calculateCarbon = () => {
-    const result =
-      commute * 0.21 +
-      electricity * 0.82 +
-      meals * 2.5
-
-    const finalValue = Number(result.toFixed(2))
-    setCarbon(finalValue)
-
-    const optimized = Number((finalValue * 0.85).toFixed(2))
-    setReducedCarbon(optimized)
-
-    if (finalValue > 250) {
-      setInsight(
-        'Your carbon footprint is high due to daily commute and electricity usage. Gemini AI recommends optimizing travel and reducing peak energy consumption.'
-      )
-    } else {
-      setInsight(
-        'Your carbon footprint is moderate. Gemini AI suggests maintaining habits while gradually adopting energy-efficient practices.'
-      )
-    }
-  }
+export default async function Home() {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (session?.user) redirect('/dashboard')
 
   return (
-    <main
-      className={`min-h-screen transition-colors duration-300 ${
-        darkMode ? 'bg-gray-900 text-gray-100' : 'bg-slate-100 text-gray-900'
-      }`}
-    >
-      <div className="max-w-xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <nav className="border-b border-neutral-200 sticky top-0 z-40 bg-white/80 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold text-primary">🌱 Carbon Autopilot</div>
+          <Link
+            href="/sign-in"
+            className="px-6 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-primary-dark transition-colors"
+          >
+            Sign In
+          </Link>
+        </div>
+      </nav>
 
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-8">
+      {/* Hero Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-4xl font-bold">
-              Carbon Autopilot
+            <h1 className="text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
+              Track. Reduce. Thrive.
             </h1>
-            <p className="text-sm text-gray-400">
-              AI-powered carbon footprint analysis using Google Gemini
+            <p className="text-xl text-neutral-600 mb-8 leading-relaxed">
+              Carbon Autopilot combines AI insights with community engagement to help you understand and reduce your carbon footprint—one sustainable choice at a time.
             </p>
+            <div className="flex gap-4">
+              <Link
+                href="/sign-up"
+                className="px-8 py-3 rounded-lg bg-primary text-white font-bold text-lg hover:bg-primary-dark transition-colors"
+              >
+                Get Started Free
+              </Link>
+              <Link
+                href="/sign-in"
+                className="px-8 py-3 rounded-lg border-2 border-primary text-primary font-bold text-lg hover:bg-primary/10 transition-colors"
+              >
+                Sign In
+              </Link>
+            </div>
           </div>
-
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="px-3 py-1 rounded-full border text-sm hover:opacity-80"
-          >
-            {darkMode ? '☀ Light' : '🌙 Dark'}
-          </button>
+          <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-12 border border-primary/20">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <span className="text-4xl">📊</span>
+                <div>
+                  <h3 className="font-bold text-foreground">Real-time Analytics</h3>
+                  <p className="text-sm text-neutral-600">Track emissions across 6 categories</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-4xl">🤖</span>
+                <div>
+                  <h3 className="font-bold text-foreground">AI Recommendations</h3>
+                  <p className="text-sm text-neutral-600">Powered by Google Gemini 2.0</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-4xl">👥</span>
+                <div>
+                  <h3 className="font-bold text-foreground">Community Challenges</h3>
+                  <p className="text-sm text-neutral-600">Compete with global peers</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-4xl">🏆</span>
+                <div>
+                  <h3 className="font-bold text-foreground">Gamification</h3>
+                  <p className="text-sm text-neutral-600">Earn badges and streaks</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* INPUT CARD */}
-        <div
-          className={`rounded-2xl p-6 shadow-lg transition ${
-            darkMode ? 'bg-gray-800' : 'bg-white'
-          }`}
-        >
-          <h2 className="text-lg font-semibold mb-4">
-            Lifestyle Inputs
+      {/* Features Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-neutral-200">
+        <h2 className="text-4xl font-bold text-foreground text-center mb-16">Powerful Features</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[
+            {
+              icon: '📈',
+              title: 'Dashboard',
+              description:
+                'Visualize your emissions with interactive charts and detailed breakdowns by category.',
+            },
+            {
+              icon: '💡',
+              title: 'Smart Recommendations',
+              description:
+                'AI generates personalized optimization strategies ranked by impact and feasibility.',
+            },
+            {
+              icon: '🔥',
+              title: 'Streak Tracking',
+              description:
+                'Maintain daily logging streaks and unlock achievements as you reach milestones.',
+            },
+            {
+              icon: '🌍',
+              title: 'Global Leaderboard',
+              description:
+                'Compare your progress with others and inspire action in the sustainability community.',
+            },
+            {
+              icon: '🎯',
+              title: 'Weekly Challenges',
+              description:
+                'Participate in community challenges and earn rewards for meeting reduction targets.',
+            },
+            {
+              icon: '⭐',
+              title: 'Points & Badges',
+              description:
+                'Unlock achievements like Eco Warrior and 7-Day Tracker as you build sustainable habits.',
+            },
+          ].map((feature, index) => (
+            <div
+              key={index}
+              className="p-6 rounded-xl border border-neutral-200 bg-white hover:shadow-lg transition-shadow"
+            >
+              <div className="text-4xl mb-4">{feature.icon}</div>
+              <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
+              <p className="text-neutral-600">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-neutral-200">
+        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-12 border border-primary/20 text-center">
+          <h2 className="text-4xl font-bold text-foreground mb-6">
+            Ready to Make a Difference?
           </h2>
-
-          <div className="space-y-4">
-            <Input label="Commute (km/day)" value={commute} setValue={setCommute} darkMode={darkMode} />
-            <Input label="Electricity (kWh/month)" value={electricity} setValue={setElectricity} darkMode={darkMode} />
-            <Input label="Meat meals per week" value={meals} setValue={setMeals} darkMode={darkMode} />
-          </div>
-
-          <button
-            onClick={calculateCarbon}
-            className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition"
+          <p className="text-xl text-neutral-600 mb-8 max-w-2xl mx-auto">
+            Join thousands of sustainability enthusiasts tracking and reducing their carbon footprint with
+            AI-powered insights.
+          </p>
+          <Link
+            href="/sign-up"
+            className="inline-block px-8 py-3 rounded-lg bg-primary text-white font-bold text-lg hover:bg-primary-dark transition-colors"
           >
-            Activate Autopilot
-          </button>
+            Start Your Sustainability Journey
+          </Link>
         </div>
+      </section>
 
-        {/* RESULTS */}
-        {carbon !== null && (
-          <div className="mt-8 space-y-6">
-
-            {/* SCORE */}
-            <div className="text-center">
-              <p className="text-sm opacity-70">Estimated Carbon Footprint</p>
-              <p className="text-3xl font-bold">{carbon} kg CO₂</p>
-            </div>
-
-            {/* AI INSIGHT */}
-            <div className={`p-4 rounded-xl border ${
-              darkMode ? 'bg-green-900/30 border-green-700' : 'bg-green-50 border-green-300'
-            }`}>
-              <p className="font-semibold mb-1 text-green-400">
-                Gemini AI Insight
-              </p>
-              <p className="text-sm">{insight}</p>
-            </div>
-
-            {/* IMPACT */}
-            <div className={`p-5 rounded-xl ${
-              darkMode ? 'bg-gray-800' : 'bg-white'
-            }`}>
-              <span className="inline-block mb-3 px-3 py-1 text-xs bg-green-600 text-white rounded-full">
-                Autopilot Enabled
-              </span>
-
-              <h3 className="font-semibold mb-4">Autopilot Impact</h3>
-
-              <Progress label="Current Emissions" value={carbon} color="red" />
-              <Progress label="With Autopilot Enabled" value={reducedCarbon!} color="green" />
-            </div>
-          </div>
-        )}
-
-        {/* FOOTER */}
-        <p className="text-center text-xs opacity-50 mt-10">
-          Built for GDG TechSprint • AI for Sustainability
-        </p>
-      </div>
-    </main>
-  )
-}
-
-/* ---------- COMPONENTS ---------- */
-
-function Input({ label, value, setValue, darkMode }: any) {
-  return (
-    <label className="block text-sm">
-      {label}
-      <input
-        type="number"
-        value={value}
-        onChange={e => setValue(+e.target.value)}
-        className={`mt-1 w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${
-          darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
-        }`}
-      />
-    </label>
-  )
-}
-
-function Progress({ label, value, color }: any) {
-  return (
-    <div className="mb-4">
-      <p className="text-sm opacity-70">{label}</p>
-      <div className="w-full bg-gray-200 h-3 rounded">
-        <div
-          className={`h-3 rounded ${color === 'red' ? 'bg-red-500' : 'bg-green-500'}`}
-          style={{ width: color === 'red' ? '80%' : '60%' }}
-        />
-      </div>
-      <p className="text-xs mt-1">{value} kg CO₂</p>
+      {/* Footer */}
+      <footer className="border-t border-neutral-200 bg-white/50 py-8 mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-neutral-600">
+          <p>
+            🌱 Carbon Autopilot • Making sustainability accessible through technology • Built for impact
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
