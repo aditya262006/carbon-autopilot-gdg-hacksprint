@@ -1,40 +1,26 @@
-import { betterAuth } from 'better-auth'
-import { pool } from '@/lib/db'
+import NextAuth from 'next-auth'
+import Google from 'next-auth/providers/google'
+import { MongoDBAdapter } from '@auth/mongodb-adapter'
+import { mongoClient, mongoDb } from '@/lib/mongodb'
 
-export const auth = betterAuth({
-  database: pool,
-  baseURL:
-    process.env.BETTER_AUTH_URL ??
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : process.env.V0_RUNTIME_URL),
-  emailAndPassword: {
-    enabled: true,
-    autoSignIn: true,
-  },
-  trustedOrigins: [
-    ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
-    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
-    ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
-      : []),
+const googleClientId = process.env.GOOGLE_CLIENT_ID_2 ?? process.env.GOOGLE_CLIENT_ID
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET_2 ?? process.env.GOOGLE_CLIENT_SECRET
+
+if (!googleClientId || !googleClientSecret) {
+  console.warn('[v0] Google OAuth environment variables are not configured')
+}
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: MongoDBAdapter(mongoClient, { databaseName: 'carbon-autopilot' }),
+  providers: [
+    Google({
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+    }),
   ],
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 1 day
-  },
-  ...(process.env.NODE_ENV === 'development'
-    ? {
-        advanced: {
-          // In dev (v0 preview iframe), force cross-site cookies so the
-          // session cookie is stored by the browser.
-          defaultCookieAttributes: {
-            sameSite: 'none' as const,
-            secure: true,
-          },
-        },
-      }
-    : {}),
+  session: { strategy: 'database' },
+  pages: { signIn: '/sign-in' },
+  trustHost: true,
 })
+
+export { mongoDb }

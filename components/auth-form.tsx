@@ -2,119 +2,54 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { authClient } from '@/lib/auth-client'
+import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
 
 export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
-  const router = useRouter()
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-
+  const [error, setError] = useState<string | null>(null)
   const isSignUp = mode === 'sign-up'
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
+  async function handleGoogle() {
     setLoading(true)
-
-    const { error } = isSignUp
-      ? await authClient.signUp.email({ email, password, name })
-      : await authClient.signIn.email({ email, password })
-
-    setLoading(false)
-
-    if (error) {
-      setError(error.message ?? 'Something went wrong')
-      return
+    setError(null)
+    try {
+      await signIn('google', { callbackUrl: '/dashboard' })
+    } catch {
+      setError('We could not start Google sign-in. Please try again.')
+      setLoading(false)
     }
-
-    router.push('/')
-    router.refresh()
   }
 
   return (
-    <main className="min-h-svh bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-sm p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {isSignUp ? 'Create an account' : 'Welcome back'}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {isSignUp
-              ? 'Sign up to get started'
-              : 'Sign in to your account to continue'}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {isSignUp && (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                autoComplete="name"
-              />
+    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+      <div className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl items-center justify-center">
+        <div className="grid w-full overflow-hidden rounded-[2rem] border border-border bg-card shadow-2xl lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="hidden min-h-[620px] flex-col justify-between bg-primary p-12 text-primary-foreground lg:flex">
+            <span className="font-mono text-sm font-semibold tracking-[0.2em]">CARBON AUTOPILOT</span>
+            <div>
+              <p className="mb-4 font-mono text-sm uppercase tracking-[0.2em] opacity-75">Small steps, visible impact</p>
+              <h1 className="max-w-md text-balance text-5xl font-semibold leading-tight">Your lighter future starts here.</h1>
+              <p className="mt-6 max-w-md text-base leading-7 opacity-80">Understand your footprint, build better habits, and let useful insight guide the way.</p>
             </div>
-          )}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
+            <p className="font-mono text-xs uppercase tracking-[0.15em] opacity-60">Measure what matters</p>
           </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              autoComplete={isSignUp ? 'new-password' : 'current-password'}
-            />
+          <div className="flex min-h-[620px] flex-col justify-center p-8 sm:p-14">
+            <Link href="/" className="mb-14 font-mono text-xs tracking-[0.16em] text-muted-foreground lg:hidden">CARBON AUTOPILOT</Link>
+            <p className="font-mono text-sm uppercase tracking-[0.18em] text-primary">{isSignUp ? 'Begin your journey' : 'Welcome back'}</p>
+            <h2 className="mt-3 text-4xl font-semibold tracking-tight">{isSignUp ? 'Create your account' : 'Sign in to continue'}</h2>
+            <p className="mt-4 max-w-sm leading-7 text-muted-foreground">{isSignUp ? 'Join a growing community making sustainability practical.' : 'Pick up where you left off and see your progress.'}</p>
+            <div className="mt-10">
+              <Button type="button" onClick={handleGoogle} disabled={loading} className="h-12 w-full rounded-xl bg-foreground text-background hover:bg-foreground/90">
+                <span className="mr-3 grid h-6 w-6 place-items-center rounded-full bg-background text-sm font-bold text-foreground">G</span>
+                {loading ? 'Connecting…' : `Continue with Google`}
+              </Button>
+              {error && <p className="mt-4 text-sm text-destructive" role="alert">{error}</p>}
+            </div>
+            <p className="mt-8 text-center text-sm text-muted-foreground">{isSignUp ? 'Already have an account? ' : 'New to Carbon Autopilot? '}<Link href={isSignUp ? '/sign-in' : '/sign-up'} className="font-semibold text-primary hover:underline">{isSignUp ? 'Sign in' : 'Create one'}</Link></p>
           </div>
-
-          {error && (
-            <p className="text-sm text-destructive" role="alert">
-              {error}
-            </p>
-          )}
-
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading
-              ? 'Please wait...'
-              : isSignUp
-                ? 'Create account'
-                : 'Sign in'}
-          </Button>
-        </form>
-
-        <p className="text-sm text-muted-foreground text-center mt-6">
-          {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-          <Link
-            href={isSignUp ? '/sign-in' : '/sign-up'}
-            className="text-foreground font-medium underline-offset-4 hover:underline"
-          >
-            {isSignUp ? 'Sign in' : 'Sign up'}
-          </Link>
-        </p>
-      </Card>
+        </div>
+      </div>
     </main>
   )
 }

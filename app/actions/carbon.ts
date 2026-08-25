@@ -4,12 +4,11 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { carbonEntries, userStats, achievements } from '@/lib/db/schema'
 import { eq, desc, and, gte, lte } from 'drizzle-orm'
-import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
 async function getUserId() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user) throw new Error('Unauthorized')
+  const session = await auth()
+  if (!session?.user?.id) throw new Error('Unauthorized')
   return session.user.id
 }
 

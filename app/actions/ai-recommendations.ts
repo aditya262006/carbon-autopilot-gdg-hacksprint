@@ -4,14 +4,13 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { recommendations, carbonEntries, userStats } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
-import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { generateText } from 'ai'
 import { google } from '@ai-sdk/google'
 
 async function getUserId() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user) throw new Error('Unauthorized')
+  const session = await auth()
+  if (!session?.user?.id) throw new Error('Unauthorized')
   return session.user.id
 }
 
